@@ -111,7 +111,7 @@ struct FileManagerView: View {
             .navigationTitle("文件管理")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
-                ToolbarItem(placement .navigationBarTrailing) {
+                ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {
                         showingFilePicker = true
                     }) {
@@ -286,7 +286,7 @@ struct DocumentPicker: UIViewControllerRepresentable {
     
     func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
         let picker = UIDocumentPickerViewController(forOpeningContentTypes: [
-            .zipArchive,
+            .zip,
             .item
         ])
         picker.allowsMultipleSelection = false

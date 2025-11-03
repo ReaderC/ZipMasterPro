@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 struct VolumeCompressionView: View {
     @State private var fileSize: Double = 1000 // MB
@@ -365,7 +366,7 @@ struct VolumeCompressionView: View {
         print("Starting volume compression with \(calculatedVolumes) volumes")
     }
     
-    @StateObject private var cancellables = Set<AnyCancellable>()
+    @State private var cancellables = Set<AnyCancellable>()
 }
 
 struct CompressionLevelButton: View {

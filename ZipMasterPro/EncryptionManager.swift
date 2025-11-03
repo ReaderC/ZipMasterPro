@@ -8,6 +8,7 @@
 import Foundation
 import CryptoKit
 import Combine
+import CommonCrypto
 
 class EncryptionManager: ObservableObject {
     @Published var isProcessing = false
@@ -107,24 +108,32 @@ class EncryptionManager: ObservableObject {
     private func deriveKey(from password: String) -> Data {
         let passwordData = password.data(using: .utf8)!
         let keyLength = 32 // 256 bits
-        
+        let salt = Data(count: 16) // Use a fixed salt for simplicity
+
         var derivedKey = Data(repeating: 0, count: keyLength)
-        derivedKey.withUnsafeMutableBytes { keyBytes in
+        let status = derivedKey.withUnsafeMutableBytes { keyBytes in
             passwordData.withUnsafeBytes { passwordBytes in
-                CCKeyDerivationPBKDF(
-                    CCPBKDFAlgorithm(kCCPBKDF2),
-                    passwordBytes.bindMemory(to: Int8.self).baseAddress,
-                    passwordData.count,
-                    nil, // No salt for simplicity, but should use salt in production
-                    0,
-                    CCPseudoRandomAlgorithm(kCCPRFHmacAlgSHA256),
-                    10000, // iterations
-                    keyBytes.bindMemory(to: UInt8.self).baseAddress,
-                    keyLength
-                )
+                salt.withUnsafeBytes { saltBytes in
+                    CCKeyDerivationPBKDF(
+                        CCPBKDFAlgorithm(kCCPBKDF2),
+                        passwordBytes.bindMemory(to: Int8.self).baseAddress!,
+                        passwordData.count,
+                        saltBytes.bindMemory(to: UInt8.self).baseAddress!,
+                        salt.count,
+                        CCPseudoRandomAlgorithm(kCCPRFHmacAlgSHA256),
+                        10000, // iterations
+                        keyBytes.bindMemory(to: UInt8.self).baseAddress!,
+                        keyLength
+                    )
+                }
             }
         }
-        
+
+        if status != kCCSuccess {
+            // Handle error - for now, return empty data
+            return Data()
+        }
+
         return derivedKey
     }
 }
@@ -147,3 +156,4 @@ extension AES {
 // Constants for encryption
 private let kCCPBKDF2 = UInt32(2)
 private let kCCPRFHmacAlgSHA256 = UInt32(2)
+private let kCCSuccess = Int32(0)

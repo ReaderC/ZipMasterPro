@@ -1,0 +1,162 @@
+name: Build and Release IPA
+
+on:
+  push:
+    tags:
+      - 'v*'  # 当推送版本标签时触发
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version number'
+        required: true
+        default: '1.0.0'
+
+jobs:
+  build-ipa:
+    runs-on: macos-14
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Xcode
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: '15.4'
+        
+    - name: Cache build artifacts
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/Library/Developer/Xcode/DerivedData
+          build/
+        key: ${{ runner.os }}-build-${{ hashFiles('**/project.pbxproj') }}
+        restore-keys: |
+          ${{ runner.os }}-build-
+          
+    - name: Build and create IPA
+      run: |
+        echo "🔨 开始构建iOS应用..."
+        
+        # 构建应用
+        xcodebuild -project ZipMasterPro.xcodeproj \
+          -scheme ZipMasterPro \
+          -configuration Release \
+          -destination 'generic/platform=iOS' \
+          -derivedDataPath build/ \
+          clean build \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_ALLOWED=NO \
+          AD_HOC_CODE_SIGNING_ALLOWED=YES \
+          ARCHS="arm64" \
+          ONLY_ACTIVE_ARCH=NO \
+          BUILD_LIBRARY_FOR_DISTRIBUTION=NO
+          
+        echo "📦 创建IPA包..."
+        
+        # 找到构建的应用
+        APP_PATH=$(find build/Build/Products/Release-iphoneos -name "*.app" | head -1)
+        
+        if [ -z "$APP_PATH" ]; then
+          echo "❌ 未找到.app文件"
+          exit 1
+        fi
+        
+        echo "找到应用: $APP_PATH"
+        
+        # 创建Payload目录
+        mkdir -p Payload
+        cp -R "$APP_PATH" Payload/
+        
+        # 创建IPA文件
+        zip -r ZipMasterPro_unsigned.ipa Payload
+        
+        # 清理
+        rm -rf Payload
+        
+        echo "✅ IPA文件创建完成: ZipMasterPro_unsigned.ipa"
+        
+    - name: Get version info
+      id: version
+      run: |
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+        else
+          echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+        fi
+        
+    - name: Create Release
+      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+      uses: softprops/action-gh-release@v1
+      with:
+        name: ZipMaster Pro v${{ steps.version.outputs.version }}
+        body: |
+          ## 🎉 ZipMaster Pro v${{ steps.version.outputs.version }} 发布！
+          
+          基于iOS 26 LiquidGlass设计语言的强大解压缩工具。
+          
+          ### ✨ 新功能
+          - 支持多种压缩格式 (ZIP, 7Z, RAR, TAR, GZIP, BZIP2)
+          - AES-256军用级加密
+          - 智能分卷压缩
+          - LiquidGlass毛玻璃设计效果
+          
+          ### 📱 安装说明
+          这是一个未签名的IPA文件，适用于测试和开发目的。
+          
+          **安装方法：**
+          1. 使用Xcode安装：连接设备，拖拽IPA到Devices窗口
+          2. 使用AltStore安装：通过AltStore应用安装
+          3. 使用Sideloadly安装：通过Sideloadly工具安装
+          4. 越狱设备：使用AppSync Unified安装
+          
+          ### ⚠️ 重要提醒
+          - 此IPA文件为未签名版本，仅用于测试和开发
+          - 需要iOS 17.0或更高版本
+          - 商业使用需要相应的开发者证书
+          
+          ### 🔧 技术信息
+          - **构建环境**: GitHub Actions + macOS 14 + Xcode 15.4
+          - **目标平台**: iOS 17.0+
+          - **架构**: arm64
+          - **大小**: 约 5MB
+          
+          感谢使用ZipMaster Pro！
+        files: ZipMasterPro_unsigned.ipa
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Upload IPA as artifact (for workflow_dispatch)
+      if: github.event_name == 'workflow_dispatch'
+      uses: actions/upload-artifact@v4
+      with:
+        name: ZipMasterPro-v${{ steps.version.outputs.version }}-unsigned
+        path: ZipMasterPro_unsigned.ipa
+        retention-days: 90
+        
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-artifacts
+        path: |
+          build/
+          !build/Build/Intermediates.noindex/
+        retention-days: 7
+        
+    - name: Success notification
+      run: |
+        echo "🎉 构建完成！"
+        echo "📱 IPA文件已生成: ZipMasterPro_unsigned.ipa"
+        echo "🔧 版本: ${{ steps.version.outputs.version }}"
+        echo "📦 文件大小: $(ls -lh ZipMasterPro_unsigned.ipa | awk '{print $5}')"
+        
+    - name: Cleanup on failure
+      if: failure()
+      run: |
+        echo "❌ 构建失败"
+        echo "检查构建日志获取详细信息"
+        # 保留构建日志以供调试
+        mkdir -p failure-logs
+        cp -r ~/Library/Developer/Xcode/DerivedData/*/Logs/ failure-logs/ 2>/dev/null || true

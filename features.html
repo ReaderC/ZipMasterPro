@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>功能特性 - ZipMaster Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --accent-color: #f093fb;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --glass-shadow: rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .liquid-glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px var(--glass-shadow);
+            transition: all 0.3s ease;
+        }
+        
+        .liquid-glass:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .hero-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('./resources/hero-bg.jpg') center/cover;
+            z-index: -2;
+        }
+        
+        .hero-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.8) 0%, rgba(118, 75, 162, 0.8) 100%);
+            z-index: -1;
+        }
+        
+        .nav-blur {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .feature-card {
+            min-height: 300px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .comparison-table {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        
+        .table-header {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+        }
+        
+        .format-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 12px;
+        }
+        
+        .zip-icon { background: #3b82f6; }
+        .sevenz-icon { background: #10b981; }
+        .rar-icon { background: #ef4444; }
+        .tar-icon { background: #f59e0b; }
+        .gzip-icon { background: #8b5cf6; }
+        .bz2-icon { background: #6366f1; }
+        
+        .demo-area {
+            min-height: 400px;
+            position: relative;
+        }
+        
+        .volume-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 16px;
+        }
+        
+        .volume-part {
+            width: 60px;
+            height: 40px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            .comparison-table {
+                font-size: 14px;
+            }
+            
+            .feature-card {
+                min-height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Elements -->
+    <div class="hero-bg"></div>
+    <div class="hero-overlay"></div>
+    
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 nav-blur">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-r from-purple-400 to-pink-400 rounded-lg flex items-center justify-center">
+                        <span class="text-white font-bold text-lg">Z</span>
+                    </div>
+                    <span class="text-white font-bold text-xl">ZipMaster Pro</span>
+                </div>
+                
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="index.html" class="text-white hover:text-pink-300 transition-colors font-medium">首页</a>
+                    <a href="features.html" class="text-pink-300 font-medium">功能</a>
+                    <a href="download.html" class="text-white hover:text-pink-300 transition-colors font-medium">下载</a>
+                </div>
+                
+                <button class="liquid-glass px-6 py-2 text-white font-medium">
+                    立即下载
+                </button>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Hero Section -->
+    <section class="pt-32 pb-20 px-6">
+        <div class="container mx-auto text-center">
+            <div class="max-w-4xl mx-auto">
+                <h1 class="text-5xl md:text-6xl font-bold text-white mb-6">
+                    功能<span class="gradient-text">特性</span>
+                </h1>
+                <p class="text-xl md:text-2xl text-white/90 mb-8 leading-relaxed">
+                    探索ZipMaster Pro的强大功能，体验专业级解压缩工具
+                </p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Format Support Comparison -->
+    <section class="py-20 px-6">
+        <div class="container mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-white mb-4">格式支持对比</h2>
+                <p class="text-xl text-white/80">全面支持主流压缩格式，满足各种需求</p>
+            </div>
+            
+            <div class="comparison-table overflow-x-auto">
+                <table class="w-full">
+                    <thead class="table-header">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-white font-semibold">格式</th>
+                            <th class="px-6 py-4 text-center text-white font-semibold">解压</th>
+                            <th class="px-6 py-4 text-center text-white font-semibold">压缩</th>
+                            <th class="px-6 py-4 text-center text-white font-semibold">加密</th>
+                            <th class="px-6 py-4 text-center text-white font-semibold">分卷</th>
+                            <th class="px-6 py-4 text-center text-white font-semibold">压缩比</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/10">
+                        <tr class="hover:bg-white/5 transition-colors">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="format-icon zip-icon">ZIP</div>
+                                    <div>
+                                        <div class="text-white font-medium">ZIP</div>
+                                        <div class="text-white/60 text-sm">最流行格式</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="text-green-400 text-xl">✓</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="text-green-400 text-xl">✓</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="text-green-400 text-xl">✓</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="text-green-400 text-xl">✓</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <div class="flex items-center justify-center">
+                                    <div class="w-16 bg-white/20 rounded-full h-2">
+                                        <div class="bg-blue-500 h-2 rounded-full" style="width: 70%"></div>
+                                    </div>
+                                    <span class="text-white/80 text-sm ml-2">70%</span>
+                                </div>
+                            </td>
+                        </tr>
+                        
+                        <tr class="hover:bg-white/5 transition-colors">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="format-icon sevenz-icon">7Z</div>
+                                    <div>
+                                        <div class="text-white font-medium">7Z</div>
+                                        <div class="text-white/60 text-sm">最高压缩比</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="text-green-400 text-xl">✓</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="text-green-400 text-xl">✓</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="text-green-400 text-xl">✓</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="text-green-400 text-xl">✓</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <div class="flex items-center justify-center">
+                                    <div class="w-16 bg-white/20 rounded-full h-2">
+                                        <div class="bg-green-500 h-2 rounded-full" style="width: 95%"></div>
+                                    </div>
+                                    <span class="text-white/80 text-sm ml-2">95%</span>
+                                </div>
+                            </td>
+                        </tr>
+                        
+                        <tr class="hover:bg-white/5 transition-colors">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="format-icon rar-icon">RAR</div>
+                                    <div>
+                                        <div class="text-white font-medium">RAR</div>
+                                        <div class="text-white/60 text-sm">功能强大</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="text-green-400 text-xl">✓</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="text-red-400 text-xl">✗</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="text-green-400 text-xl">✓</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="text-green-400 text-xl">✓</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <div class="flex items-center justify-center">
+                                    <div class="w-16 bg-white/20 rounded-full h-2">
+                                        <div class="bg-red-500 h-2 rounded-full" style="width: 85%"></div>
+                                    </div>
+                                    <span class="text-white/80 text-sm ml-2">85%</span>
+                                </div>
+                            </td>
+                        </tr>
+                        
+                        <tr class="hover:bg-white/5 transition-colors">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="format-icon tar-icon">TAR</div>
+                                    <div>
+                                        <div class="text-white font-medium">TAR</div>
+                                        <div class="text-white/60 text-sm">Linux标准</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="text-green-400 text-xl">✓</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="text-green-400 text-xl">✓</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="text-red-400 text-xl">✗</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="text-red-400 text-xl">✗</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <div class="flex items-center justify-center">
+                                    <div class="w-16 bg-white/20 rounded-full h-2">
+                                        <div class="bg-yellow-500 h-2 rounded-full" style="width: 50%"></div>
+                                    </div>
+                                    <span class="text-white/80 text-sm ml-2">50%</span>
+                                </div>
+                            </td>
+                        </tr>
+                        
+                        <tr class="hover:bg-white/5 transition-colors">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="format-icon gzip-icon">GZ</div>
+                                    <div>
+                                        <div class="text-white font-medium">GZIP</div>
+                                        <div class="text-white/60 text-sm">单文件压缩</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="text-green-400 text-xl">✓</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="text-green-400 text-xl">✓</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="text-red-400 text-xl">✗</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="text-red-400 text-xl">✗</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <div class="flex items-center justify-center">
+                                    <div class="w-16 bg-white/20 rounded-full h-2">
+                                        <div class="bg-purple-500 h-2 rounded-full" style="width: 75%"></div>
+                                    </div>
+                                    <span class="text-white/80 text-sm ml-2">75%</span>
+                                </div>
+                            </td>
+                        </tr>
+                        
+                        <tr class="hover:bg-white/5 transition-colors">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="format-icon bz2-icon">BZ2</div>
+                                    <div>
+                                        <div class="text-white font-medium">BZIP2</div>
+                                        <div class="text-white/60 text-sm">高压缩比</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="text-green-400 text-xl">✓</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="text-green-400 text-xl">✓</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="text-red-400 text-xl">✗</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="text-red-400 text-xl">✗</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <div class="flex items-center justify-center">
+                                    <div class="w-16 bg-white/20 rounded-full h-2">
+                                        <div class="bg-indigo-500 h-2 rounded-full" style="width: 90%"></div>
+                                    </div>
+                                    <span class="text-white/80 text-sm ml-2">90%</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Advanced Features -->
+    <section class="py-20 px-6">
+        <div class="container mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-white mb-4">高级功能</h2>
+                <p class="text-xl text-white/80">专业级工具，满足您的所有需求</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="liquid-glass feature-card p-8">
+                    <div class="text-4xl mb-6 text-center">🔐</div>
+                    <h3 class="text-2xl font-bold text-white mb-4 text-center">军用级加密</h3>
+                    <div class="space-y-3 text-white/80">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-400">✓</span>
+                            <span>AES-256加密标准</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-400">✓</span>
+                            <span>密码保护压缩包</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-400">✓</span>
+                            <span>支持加密文件名</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-400">✓</span>
+                            <span>多重加密算法</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="liquid-glass feature-card p-8">
+                    <div class="text-4xl mb-6 text-center">⚡</div>
+                    <h3 class="text-2xl font-bold text-white mb-4 text-center">极速处理</h3>
+                    <div class="space-y-3 text-white/80">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-400">✓</span>
+                            <span>多线程处理</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-400">✓</span>
+                            <span>硬件加速支持</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-400">✓</span>
+                            <span>智能内存管理</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-400">✓</span>
+                            <span>后台处理模式</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="liquid-glass feature-card p-8">
+                    <div class="text-4xl mb-6 text-center">📱</div>
+                    <h3 class="text-2xl font-bold text-white mb-4 text-center">云端集成</h3>
+                    <div class="space-y-3 text-white/80">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-400">✓</span>
+                            <span>iCloud Drive支持</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-400">✓</span>
+                            <span>Dropbox集成</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-400">✓</span>
+                            <span>Google Drive连接</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-400">✓</span>
+                            <span>OneDrive同步</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="liquid-glass feature-card p-8">
+                    <div class="text-4xl mb-6 text-center">🔍</div>
+                    <h3 class="text-2xl font-bold text-white mb-4 text-center">文件预览</h3>
+                    <div class="space-y-3 text-white/80">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-400">✓</span>
+                            <span>多种格式预览</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-400">✓</span>
+                            <span>缩略图生成</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-400">✓</span>
+                            <span>快速查看模式</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-400">✓</span>
+                            <span>外部应用打开</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="liquid-glass feature-card p-8">
+                    <div class="text-4xl mb-6 text-center">📊</div>
+                    <h3 class="text-2xl font-bold text-white mb-4 text-center">批量操作</h3>
+                    <div class="space-y-3 text-white/80">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-400">✓</span>
+                            <span>批量压缩解压</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-400">✓</span>
+                            <span>自动重命名</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-400">✓</span>
+                            <span>文件过滤规则</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-400">✓</span>
+                            <span>任务队列管理</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="liquid-glass feature-card p-8">
+                    <div class="text-4xl mb-6 text-center">🎨</div>
+                    <h3 class="text-2xl font-bold text-white mb-4 text-center">个性化设置</h3>
+                    <div class="space-y-3 text-white/80">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-400">✓</span>
+                            <span>主题颜色定制</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-400">✓</span>
+                            <span>压缩参数调整</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-400">✓</span>
+                            <span>默认保存路径</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-400">✓</span>
+                            <span>通知设置</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Volume Compression Demo -->
+    <section class="py-20 px-6">
+        <div class="container mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-white mb-4">分卷压缩演示</h2>
+                <p class="text-xl text-white/80">智能分卷，灵活控制文件大小</p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <div class="liquid-glass demo-area p-8">
+                    <h3 class="text-2xl font-bold text-white mb-6">设置参数</h3>
+                    
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-white/80 text-sm mb-3">原始文件大小</label>
+                            <div class="flex items-center space-x-4">
+                                <input type="range" id="file-size-slider" min="100" max="5000" value="1000" class="flex-1 h-2 bg-white/20 rounded-lg appearance-none cursor-pointer">
+                                <span id="file-size-display" class="text-white font-medium">1000MB</span>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-white/80 text-sm mb-3">分卷大小</label>
+                            <div class="flex items-center space-x-4">
+                                <input type="range" id="volume-size-slider" min="10" max="500" value="100" class="flex-1 h-2 bg-white/20 rounded-lg appearance-none cursor-pointer">
+                                <span id="volume-size-display" class="text-white font-medium">100MB</span>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-white/80 text-sm mb-3">压缩级别</label>
+                            <div class="grid grid-cols-3 gap-3">
+                                <button class="compression-btn p-3 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors" data-level="store">存储</button>
+                                <button class="compression-btn p-3 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors" data-level="fast">快速</button>
+                                <button class="compression-btn p-3 bg-pink-500 text-white rounded-lg" data-level="normal">标准</button>
+                                <button class="compression-btn p-3 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors" data-level="good">较好</button>
+                                <button class="compression-btn p-3 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors" data-level="best">最好</button>
+                                <button class="compression-btn p-3 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors" data-level="ultra">极致</button>
+                            </div>
+                        </div>
+                        
+                        <button id="calculate-btn" class="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white py-3 rounded-lg transition-all">
+                            计算分卷结果
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="liquid-glass demo-area p-8">
+                    <h3 class="text-2xl font-bold text-white mb-6">分卷预览</h3>
+                    
+                    <div id="volume-results" class="hidden">
+                        <div class="grid grid-cols-2 gap-6 mb-6">
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-white" id="total-parts">10</div>
+                                <div class="text-white/60 text-sm">总分卷数</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-white" id="compressed-size">700</div>
+                                <div class="text-white/60 text-sm">压缩后大小(MB)</div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <div class="flex justify-between text-white/80 text-sm mb-2">
+                                <span>压缩进度</span>
+                                <span id="compression-progress">0%</span>
+                            </div>
+                            <div class="w-full bg-white/20 rounded-full h-3">
+                                <div id="compression-bar" class="bg-gradient-to-r from-pink-500 to-purple-600 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="volume-preview" id="volume-preview">
+                            <!-- Volume parts will be generated here -->
+                        </div>
+                        
+                        <div class="mt-6 text-center">
+                            <div class="text-white/60 text-sm mb-2">预计压缩时间</div>
+                            <div class="text-white font-medium" id="estimated-time">2分钟</div>
+                        </div>
+                    </div>
+                    
+                    <div id="volume-placeholder" class="text-center text-white/60">
+                        <div class="text-6xl mb-4">📦</div>
+                        <p>设置参数后点击计算查看分卷结果</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Performance Chart -->
+    <section class="py-20 px-6">
+        <div class="container mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-white mb-4">性能对比</h2>
+                <p class="text-xl text-white/80">ZipMaster Pro vs 其他解压工具</p>
+            </div>
+            
+            <div class="liquid-glass p-8">
+                <div id="performance-chart" style="width: 100%; height: 400px;"></div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- CTA Section -->
+    <section class="py-20 px-6">
+        <div class="container mx-auto text-center">
+            <div class="liquid-glass p-12 max-w-2xl mx-auto">
+                <h2 class="text-4xl font-bold text-white mb-6">体验专业功能</h2>
+                <p class="text-xl text-white/80 mb-8">立即下载ZipMaster Pro，解锁所有高级功能</p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button class="liquid-glass px-8 py-4 text-white font-semibold text-lg hover:scale-105 transition-transform">
+                        📱 免费下载
+                    </button>
+                    <button class="liquid-glass px-8 py-4 text-white font-semibold text-lg hover:scale-105 transition-transform">
+                        💎 升级Pro版
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer class="py-12 px-6">
+        <div class="container mx-auto text-center">
+            <div class="flex items-center justify-center space-x-3 mb-6">
+                <div class="w-10 h-10 bg-gradient-to-r from-purple-400 to-pink-400 rounded-lg flex items-center justify-center">
+                    <span class="text-white font-bold text-lg">Z</span>
+                </div>
+                <span class="text-white font-bold text-xl">ZipMaster Pro</span>
+            </div>
+            <p class="text-white/60 text-sm">© 2025 ZipMaster Pro. 专为iOS 26 LiquidGlass设计打造</p>
+        </div>
+    </footer>
+    
+    <script src="main.js"></script>
+</body>
+</html>

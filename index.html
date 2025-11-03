@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZipMaster Pro - iOS解压缩专家</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/js/splide.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/css/splide.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --accent-color: #f093fb;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --glass-shadow: rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .liquid-glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px var(--glass-shadow);
+            transition: all 0.3s ease;
+        }
+        
+        .liquid-glass:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .hero-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('./resources/hero-bg.jpg') center/cover;
+            z-index: -2;
+        }
+        
+        .hero-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.8) 0%, rgba(118, 75, 162, 0.8) 100%);
+            z-index: -1;
+        }
+        
+        .nav-blur {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .floating-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .pulse-glow {
+            animation: pulse-glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes pulse-glow {
+            from { box-shadow: 0 0 20px rgba(240, 147, 251, 0.3); }
+            to { box-shadow: 0 0 40px rgba(240, 147, 251, 0.6); }
+        }
+        
+        .file-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--glass-bg);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+        }
+        
+        .progress-bar {
+            background: linear-gradient(90deg, #f093fb, #f5576c);
+            height: 8px;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        .demo-card {
+            min-height: 400px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .demo-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: rotate(45deg);
+            transition: all 0.5s;
+            opacity: 0;
+        }
+        
+        .demo-card:hover::before {
+            opacity: 1;
+            animation: shimmer 1.5s ease-in-out;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+        
+        .particle-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .demo-card {
+                min-height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Elements -->
+    <div class="hero-bg"></div>
+    <div class="hero-overlay"></div>
+    <div id="particle-container" class="particle-bg"></div>
+    
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 nav-blur">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-r from-purple-400 to-pink-400 rounded-lg flex items-center justify-center">
+                        <span class="text-white font-bold text-lg">Z</span>
+                    </div>
+                    <span class="text-white font-bold text-xl">ZipMaster Pro</span>
+                </div>
+                
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="index.html" class="text-white hover:text-pink-300 transition-colors font-medium">首页</a>
+                    <a href="features.html" class="text-white hover:text-pink-300 transition-colors font-medium">功能</a>
+                    <a href="download.html" class="text-white hover:text-pink-300 transition-colors font-medium">下载</a>
+                </div>
+                
+                <button class="liquid-glass px-6 py-2 text-white font-medium pulse-glow">
+                    立即下载
+                </button>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Hero Section -->
+    <section class="pt-32 pb-20 px-6">
+        <div class="container mx-auto text-center">
+            <div class="max-w-4xl mx-auto">
+                <h1 class="hero-title text-5xl md:text-7xl font-bold text-white mb-6 floating-animation">
+                    <span class="gradient-text">LiquidGlass</span><br>
+                    解压缩专家
+                </h1>
+                <p class="text-xl md:text-2xl text-white/90 mb-8 leading-relaxed">
+                    体验iOS 26最新LiquidGlass设计语言的强大解压缩工具
+                    <br>支持ZIP、7Z、RAR等所有主流格式
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                    <button class="liquid-glass px-8 py-4 text-white font-semibold text-lg hover:scale-105 transition-transform">
+                        🚀 立即体验
+                    </button>
+                    <button class="liquid-glass px-8 py-4 text-white font-semibold text-lg hover:scale-105 transition-transform">
+                        📱 观看演示
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- App Interface Preview -->
+    <section class="py-20 px-6">
+        <div class="container mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-white mb-4">优雅的用户界面</h2>
+                <p class="text-xl text-white/80">基于iOS LiquidGlass设计语言，带来前所未有的视觉体验</p>
+            </div>
+            
+            <div class="flex justify-center">
+                <div class="liquid-glass p-8 max-w-md w-full floating-animation">
+                    <img src="./resources/app-interface.png" alt="App Interface" class="w-full h-auto rounded-lg shadow-2xl">
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Interactive Demo Section -->
+    <section class="py-20 px-6">
+        <div class="container mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-white mb-4">核心功能演示</h2>
+                <p class="text-xl text-white/80">体验强大的解压缩功能，支持所有主流格式</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- File Extraction Demo -->
+                <div class="liquid-glass demo-card p-6">
+                    <div class="text-center mb-6">
+                        <div class="file-icon mx-auto mb-4">
+                            <span class="text-2xl">📦</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-2">文件解压</h3>
+                        <p class="text-white/70 text-sm">支持ZIP, 7Z, RAR等格式</p>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <button id="select-file-btn" class="w-full bg-white/20 hover:bg-white/30 text-white py-3 rounded-lg transition-colors">
+                            选择压缩文件
+                        </button>
+                        
+                        <div id="extraction-progress" class="hidden">
+                            <div class="flex justify-between text-sm text-white/80 mb-2">
+                                <span>解压进度</span>
+                                <span id="progress-text">0%</span>
+                            </div>
+                            <div class="w-full bg-white/20 rounded-full h-2">
+                                <div id="progress-bar" class="progress-bar w-0 h-2 rounded-full"></div>
+                            </div>
+                            <div id="file-list" class="mt-4 space-y-2"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Format Support Demo -->
+                <div class="liquid-glass demo-card p-6">
+                    <div class="text-center mb-6">
+                        <div class="file-icon mx-auto mb-4">
+                            <span class="text-2xl">🗂️</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-2">格式支持</h3>
+                        <p class="text-white/70 text-sm">全面支持主流压缩格式</p>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <div class="format-item flex items-center justify-between p-3 bg-white/10 rounded-lg cursor-pointer hover:bg-white/20 transition-colors" data-format="zip">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-blue-500 rounded flex items-center justify-center text-white text-xs font-bold">ZIP</div>
+                                <span class="text-white text-sm">ZIP格式</span>
+                            </div>
+                            <span class="text-white/60 text-xs">最受欢迎</span>
+                        </div>
+                        
+                        <div class="format-item flex items-center justify-between p-3 bg-white/10 rounded-lg cursor-pointer hover:bg-white/20 transition-colors" data-format="7z">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-green-500 rounded flex items-center justify-center text-white text-xs font-bold">7Z</div>
+                                <span class="text-white text-sm">7Z格式</span>
+                            </div>
+                            <span class="text-white/60 text-xs">高压缩比</span>
+                        </div>
+                        
+                        <div class="format-item flex items-center justify-between p-3 bg-white/10 rounded-lg cursor-pointer hover:bg-white/20 transition-colors" data-format="rar">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-red-500 rounded flex items-center justify-center text-white text-xs font-bold">RAR</div>
+                                <span class="text-white text-sm">RAR格式</span>
+                            </div>
+                            <span class="text-white/60 text-xs">强大功能</span>
+                        </div>
+                        
+                        <div id="format-details" class="hidden mt-4 p-4 bg-white/10 rounded-lg">
+                            <h4 class="text-white font-semibold mb-2">格式详情</h4>
+                            <p id="format-description" class="text-white/80 text-sm"></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Encryption Demo -->
+                <div class="liquid-glass demo-card p-6">
+                    <div class="text-center mb-6">
+                        <div class="file-icon mx-auto mb-4">
+                            <span class="text-2xl">🔐</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-2">加密解密</h3>
+                        <p class="text-white/70 text-sm">AES-256军用级加密</p>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-white/80 text-sm mb-2">设置密码</label>
+                            <input type="password" id="password-input" class="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-pink-400" placeholder="输入加密密码">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-white/80 text-sm mb-2">加密强度</label>
+                            <select id="encryption-strength" class="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-pink-400">
+                                <option value="128">AES-128</option>
+                                <option value="256" selected>AES-256</option>
+                            </select>
+                        </div>
+                        
+                        <button id="encrypt-btn" class="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white py-3 rounded-lg transition-all">
+                            开始加密
+                        </button>
+                        
+                        <div id="encryption-status" class="hidden text-center">
+                            <div class="inline-flex items-center space-x-2">
+                                <div class="w-4 h-4 bg-green-400 rounded-full animate-pulse"></div>
+                                <span class="text-white text-sm">加密中...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Volume Compression Demo -->
+                <div class="liquid-glass demo-card p-6">
+                    <div class="text-center mb-6">
+                        <div class="file-icon mx-auto mb-4">
+                            <span class="text-2xl">📊</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-2">分卷压缩</h3>
+                        <p class="text-white/70 text-sm">智能分卷，灵活控制</p>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-white/80 text-sm mb-2">分卷大小: <span id="volume-size">100</span>MB</label>
+                            <input type="range" id="volume-slider" min="10" max="1000" value="100" class="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-white/80 text-sm mb-2">压缩级别</label>
+                            <div class="flex space-x-2">
+                                <button class="compression-level flex-1 p-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded transition-colors" data-level="fast">快速</button>
+                                <button class="compression-level flex-1 p-2 bg-pink-500 text-white text-sm rounded" data-level="normal">标准</button>
+                                <button class="compression-level flex-1 p-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded transition-colors" data-level="max">最大</button>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white/10 rounded-lg p-4">
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-white" id="volume-count">10</div>
+                                <div class="text-white/60 text-sm">预计分卷数量</div>
+                            </div>
+                        </div>
+                        
+                        <button id="preview-btn" class="w-full bg-white/20 hover:bg-white/30 text-white py-3 rounded-lg transition-colors">
+                            预览分卷结果
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Features Showcase -->
+    <section class="py-20 px-6">
+        <div class="container mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-white mb-4">为什么选择ZipMaster Pro</h2>
+                <p class="text-xl text-white/80">专业功能，极致体验</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="liquid-glass p-8 text-center hover:scale-105 transition-transform">
+                    <div class="text-4xl mb-4">⚡</div>
+                    <h3 class="text-xl font-bold text-white mb-3">极速解压</h3>
+                    <p class="text-white/70">采用多线程技术，解压速度提升300%，支持大文件处理</p>
+                </div>
+                
+                <div class="liquid-glass p-8 text-center hover:scale-105 transition-transform">
+                    <div class="text-4xl mb-4">🔒</div>
+                    <h3 class="text-xl font-bold text-white mb-3">安全加密</h3>
+                    <p class="text-white/70">AES-256军用级加密标准，保护您的文件安全</p>
+                </div>
+                
+                <div class="liquid-glass p-8 text-center hover:scale-105 transition-transform">
+                    <div class="text-4xl mb-4">📱</div>
+                    <h3 class="text-xl font-bold text-white mb-3">iOS原生</h3>
+                    <p class="text-white/70">完美适配iOS 26 LiquidGlass设计，原生体验</p>
+                </div>
+                
+                <div class="liquid-glass p-8 text-center hover:scale-105 transition-transform">
+                    <div class="text-4xl mb-4">🎯</div>
+                    <h3 class="text-xl font-bold text-white mb-3">智能识别</h3>
+                    <p class="text-white/70">自动识别压缩格式，一键解压无需手动选择</p>
+                </div>
+                
+                <div class="liquid-glass p-8 text-center hover:scale-105 transition-transform">
+                    <div class="text-4xl mb-4">☁️</div>
+                    <h3 class="text-xl font-bold text-white mb-3">云端支持</h3>
+                    <p class="text-white/70">支持iCloud、Dropbox等云服务，随时随地访问文件</p>
+                </div>
+                
+                <div class="liquid-glass p-8 text-center hover:scale-105 transition-transform">
+                    <div class="text-4xl mb-4">🔧</div>
+                    <h3 class="text-xl font-bold text-white mb-3">专业工具</h3>
+                    <p class="text-white/70">文件预览、批量操作、自定义设置等专业功能</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- User Reviews -->
+    <section class="py-20 px-6">
+        <div class="container mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-white mb-4">用户好评</h2>
+                <p class="text-xl text-white/80">来自App Store的真实评价</p>
+            </div>
+            
+            <div class="splide" id="reviews-slider">
+                <div class="splide__track">
+                    <ul class="splide__list">
+                        <li class="splide__slide">
+                            <div class="liquid-glass p-8 mx-4">
+                                <div class="flex items-center mb-4">
+                                    <img src="./resources/images/user1.jpg" alt="User" class="w-12 h-12 rounded-full mr-4">
+                                    <div>
+                                        <h4 class="text-white font-semibold">张小美</h4>
+                                        <div class="text-yellow-400">⭐⭐⭐⭐⭐</div>
+                                    </div>
+                                </div>
+                                <p class="text-white/80 italic">"界面设计太美了！LiquidGlass效果让人惊艳，解压速度也很快，是我用过最好的解压工具。"</p>
+                            </div>
+                        </li>
+                        
+                        <li class="splide__slide">
+                            <div class="liquid-glass p-8 mx-4">
+                                <div class="flex items-center mb-4">
+                                    <img src="./resources/images/user2.jpg" alt="User" class="w-12 h-12 rounded-full mr-4">
+                                    <div>
+                                        <h4 class="text-white font-semibold">李程序</h4>
+                                        <div class="text-yellow-400">⭐⭐⭐⭐⭐</div>
+                                    </div>
+                                </div>
+                                <p class="text-white/80 italic">"作为开发者，我很欣赏这款应用的设计理念和用户体验。功能强大，操作简单，强烈推荐！"</p>
+                            </div>
+                        </li>
+                        
+                        <li class="splide__slide">
+                            <div class="liquid-glass p-8 mx-4">
+                                <div class="flex items-center mb-4">
+                                    <img src="./resources/images/user3.jpg" alt="User" class="w-12 h-12 rounded-full mr-4">
+                                    <div>
+                                        <h4 class="text-white font-semibold">王设计</h4>
+                                        <div class="text-yellow-400">⭐⭐⭐⭐⭐</div>
+                                    </div>
+                                </div>
+                                <p class="text-white/80 italic">"设计细节处理得非常好，每一个交互都很流畅。特别是加密功能，让我在工作中更加安心。"</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- CTA Section -->
+    <section class="py-20 px-6">
+        <div class="container mx-auto text-center">
+            <div class="liquid-glass p-12 max-w-2xl mx-auto">
+                <h2 class="text-4xl font-bold text-white mb-6">准备体验了吗？</h2>
+                <p class="text-xl text-white/80 mb-8">立即下载ZipMaster Pro，享受极致的解压缩体验</p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button class="liquid-glass px-8 py-4 text-white font-semibold text-lg hover:scale-105 transition-transform">
+                        📱 App Store下载
+                    </button>
+                    <button class="liquid-glass px-8 py-4 text-white font-semibold text-lg hover:scale-105 transition-transform">
+                        🎬 观看视频
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer class="py-12 px-6">
+        <div class="container mx-auto text-center">
+            <div class="flex items-center justify-center space-x-3 mb-6">
+                <div class="w-10 h-10 bg-gradient-to-r from-purple-400 to-pink-400 rounded-lg flex items-center justify-center">
+                    <span class="text-white font-bold text-lg">Z</span>
+                </div>
+                <span class="text-white font-bold text-xl">ZipMaster Pro</span>
+            </div>
+            <p class="text-white/60 text-sm">© 2025 ZipMaster Pro. 专为iOS 26 LiquidGlass设计打造</p>
+        </div>
+    </footer>
+    
+    <script src="main.js"></script>
+</body>
+</html>

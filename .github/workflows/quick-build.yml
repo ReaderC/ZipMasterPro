@@ -1,0 +1,58 @@
+name: Quick Build IPA
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: macos-14
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Xcode
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: latest-stable
+        
+    - name: Quick build IPA
+      run: |
+        echo "🚀 快速构建ZipMaster Pro..."
+        
+        # 显示环境信息
+        xcodebuild -version
+        sw_vers
+        
+        # 快速构建
+        ./cloud_build.sh
+        
+    - name: Upload IPA
+      uses: actions/upload-artifact@v4
+      with:
+        name: ZipMasterPro-IPA-QuickBuild
+        path: ZipMasterPro_unsigned.ipa
+        retention-days: 30
+        
+    - name: Success notification
+      run: |
+        echo "🎉 快速构建完成！"
+        echo "📱 IPA文件已上传到Artifacts"
+        echo "📦 文件名: ZipMasterPro_unsigned.ipa"
+        echo "📏 文件大小: $(ls -lh ZipMasterPro_unsigned.ipa | awk '{print $5}')"
+        
+    - name: Provide installation guide
+      run: |
+        echo ""
+        echo "📱 安装指南:"
+        echo "1. 下载IPA文件 (在Artifacts中)"
+        echo "2. 使用以下方法之一安装:"
+        echo "   - Xcode: Window → Devices and Simulators → 拖拽IPA"
+        echo "   - AltStore: 通过AltStore安装"
+        echo "   - Sideloadly: 使用Sideloadly工具"
+        echo "   - 越狱设备: 使用AppSync Unified"
+        echo ""
+        echo "⚠️  这是未签名的IPA文件，仅用于测试和开发"
+        echo "   需要iOS 17.0或更高版本"

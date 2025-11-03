@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>下载中心 - ZipMaster Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --accent-color: #f093fb;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --glass-shadow: rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .liquid-glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px var(--glass-shadow);
+            transition: all 0.3s ease;
+        }
+        
+        .liquid-glass:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .hero-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('./resources/hero-bg.jpg') center/cover;
+            z-index: -2;
+        }
+        
+        .hero-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.8) 0%, rgba(118, 75, 162, 0.8) 100%);
+            z-index: -1;
+        }
+        
+        .nav-blur {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .download-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .download-btn:hover {
+            background: linear-gradient(135deg, #5a67d8 0%, #6b46a3 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .version-card {
+            min-height: 200px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .faq-item {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .faq-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        .faq-answer.active {
+            max-height: 200px;
+        }
+        
+        .app-store-badge {
+            background: #000;
+            border-radius: 12px;
+            padding: 12px 20px;
+            display: inline-flex;
+            align-items: center;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .app-store-badge:hover {
+            background: #1a1a1a;
+            transform: scale(1.05);
+        }
+        
+        .system-requirement {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .system-requirement:last-child {
+            border-bottom: none;
+        }
+        
+        @media (max-width: 768px) {
+            .version-card {
+                min-height: 180px;
+            }
+            
+            .download-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Elements -->
+    <div class="hero-bg"></div>
+    <div class="hero-overlay"></div>
+    
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 nav-blur">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-r from-purple-400 to-pink-400 rounded-lg flex items-center justify-center">
+                        <span class="text-white font-bold text-lg">Z</span>
+                    </div>
+                    <span class="text-white font-bold text-xl">ZipMaster Pro</span>
+                </div>
+                
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="index.html" class="text-white hover:text-pink-300 transition-colors font-medium">首页</a>
+                    <a href="features.html" class="text-white hover:text-pink-300 transition-colors font-medium">功能</a>
+                    <a href="download.html" class="text-pink-300 font-medium">下载</a>
+                </div>
+                
+                <button class="liquid-glass px-6 py-2 text-white font-medium">
+                    立即下载
+                </button>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Hero Section -->
+    <section class="pt-32 pb-20 px-6">
+        <div class="container mx-auto text-center">
+            <div class="max-w-4xl mx-auto">
+                <h1 class="text-5xl md:text-6xl font-bold text-white mb-6">
+                    下载<span class="gradient-text">中心</span>
+                </h1>
+                <p class="text-xl md:text-2xl text-white/90 mb-8 leading-relaxed">
+                    立即获取ZipMaster Pro，体验iOS 26 LiquidGlass设计的强大解压缩工具
+                </p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Download Options -->
+    <section class="py-20 px-6">
+        <div class="container mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-white mb-4">选择您的版本</h2>
+                <p class="text-xl text-white/80">根据需求选择合适的版本</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                <!-- Free Version -->
+                <div class="liquid-glass version-card p-8 flex flex-col">
+                    <div class="text-center mb-6">
+                        <div class="text-4xl mb-4">🆓</div>
+                        <h3 class="text-2xl font-bold text-white mb-2">免费版</h3>
+                        <div class="text-4xl font-bold gradient-text mb-4">免费</div>
+                    </div>
+                    
+                    <div class="flex-1 space-y-3 mb-6">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-400">✓</span>
+                            <span class="text-white/80">ZIP格式解压</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-400">✓</span>
+                            <span class="text-white/80">基本文件预览</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-400">✓</span>
+                            <span class="text-white/80">简单压缩功能</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-400">✓</span>
+                            <span class="text-white/80">iCloud集成</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-red-400">✗</span>
+                            <span class="text-white/60">高级格式支持</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-red-400">✗</span>
+                            <span class="text-white/60">加密功能</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-red-400">✗</span>
+                            <span class="text-white/60">分卷压缩</span>
+                        </div>
+                    </div>
+                    
+                    <button class="download-btn w-full py-3 text-white font-semibold rounded-lg">
+                        下载免费版
+                    </button>
+                </div>
+                
+                <!-- Pro Version -->
+                <div class="liquid-glass version-card p-8 flex flex-col border-2 border-pink-500 relative">
+                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                        <span class="bg-pink-500 text-white px-4 py-1 rounded-full text-sm font-semibold">推荐</span>
+                    </div>
+                    
+                    <div class="text-center mb-6">
+                        <div class="text-4xl mb-4">💎</div>
+                        <h3 class="text-2xl font-bold text-white mb-2">专业版</h3>
+                        <div class="text-4xl font-bold gradient-text mb-4">¥68</div>
+                        <div class="text-white/60 text-sm">一次性购买</div>
+                    </div>
+                    
+                    <div class="flex-1 space-y-3 mb-6">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-400">✓</span>
+                            <span class="text-white/80">全部格式支持</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-400">✓</span>
+                            <span class="text-white/80">AES-256加密</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-400">✓</span>
+                            <span class="text-white/80">分卷压缩</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-400">✓</span>
+                            <span class="text-white/80">批量处理</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-400">✓</span>
+                            <span class="text-white/80">云端集成</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-400">✓</span>
+                            <span class="text-white/80">优先技术支持</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-400">✓</span>
+                            <span class="text-white/80">无广告体验</span>
+                        </div>
+                    </div>
+                    
+                    <button class="download-btn w-full py-3 text-white font-semibold rounded-lg">
+                        购买专业版
+                    </button>
+                </div>
+                
+                <!-- Enterprise Version -->
+                <div class="liquid-glass version-card p-8 flex flex-col">
+                    <div class="text-center mb-6">
+                        <div class="text-4xl mb-4">🏢</div>
+                        <h3 class="text-2xl font-bold text-white mb-2">企业版</h3>
+                        <div class="text-4xl font-bold gradient-text mb-4">¥298</div>
+                        <div class="text-white/60 text-sm">团队授权</div>
+                    </div>
+                    
+                    <div class="flex-1 space-y-3 mb-6">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-400">✓</span>
+                            <span class="text-white/80">专业版所有功能</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-400">✓</span>
+                            <span class="text-white/80">团队管理面板</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-400">✓</span>
+                            <span class="text-white/80">批量授权管理</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-400">✓</span>
+                            <span class="text-white/80">专属技术支持</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-400">✓</span>
+                            <span class="text-white/80">定制化功能</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-400">✓</span>
+                            <span class="text-white/80">企业级安全</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-400">✓</span>
+                            <span class="text-white/80">SLA保障</span>
+                        </div>
+                    </div>
+                    
+                    <button class="download-btn w-full py-3 text-white font-semibold rounded-lg">
+                        联系销售
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- App Store Badge -->
+    <section class="py-20 px-6">
+        <div class="container mx-auto text-center">
+            <div class="liquid-glass p-12 max-w-2xl mx-auto">
+                <h2 class="text-3xl font-bold text-white mb-6">App Store下载</h2>
+                <p class="text-xl text-white/80 mb-8">通过App Store安全下载，支持自动更新</p>
+                
+                <a href="#" class="app-store-badge inline-flex items-center space-x-3 mb-8">
+                    <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+                    </svg>
+                    <div class="text-left">
+                        <div class="text-xs">下载于</div>
+                        <div class="text-lg font-semibold">App Store</div>
+                    </div>
+                </a>
+                
+                <div class="text-white/60 text-sm">
+                    <p>需要iOS 14.0或更高版本</p>
+                    <p>兼容iPhone、iPad和iPod touch</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- System Requirements -->
+    <section class="py-20 px-6">
+        <div class="container mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-white mb-4">系统要求</h2>
+                <p class="text-xl text-white/80">确保您的设备满足最低要求</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <div class="liquid-glass p-8">
+                    <h3 class="text-2xl font-bold text-white mb-6">iOS设备</h3>
+                    <div class="space-y-4">
+                        <div class="system-requirement">
+                            <span class="text-white/80">操作系统</span>
+                            <span class="text-white font-medium">iOS 14.0+</span>
+                        </div>
+                        <div class="system-requirement">
+                            <span class="text-white/80">设备类型</span>
+                            <span class="text-white font-medium">iPhone, iPad, iPod</span>
+                        </div>
+                        <div class="system-requirement">
+                            <span class="text-white/80">存储空间</span>
+                            <span class="text-white font-medium">150MB</span>
+                        </div>
+                        <div class="system-requirement">
+                            <span class="text-white/80">内存要求</span>
+                            <span class="text-white font-medium">2GB RAM</span>
+                        </div>
+                        <div class="system-requirement">
+                            <span class="text-white/80">网络连接</span>
+                            <span class="text-white font-medium">Wi-Fi/蜂窝数据</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="liquid-glass p-8">
+                    <h3 class="text-2xl font-bold text-white mb-6">推荐配置</h3>
+                    <div class="space-y-4">
+                        <div class="system-requirement">
+                            <span class="text-white/80">最佳系统</span>
+                            <span class="text-white font-medium">iOS 26+</span>
+                        </div>
+                        <div class="system-requirement">
+                            <span class="text-white/80">推荐设备</span>
+                            <span class="text-white font-medium">iPhone 12+</span>
+                        </div>
+                        <div class="system-requirement">
+                            <span class="text-white/80">存储空间</span>
+                            <span class="text-white font-medium">500MB</span>
+                        </div>
+                        <div class="system-requirement">
+                            <span class="text-white/80">内存建议</span>
+                            <span class="text-white font-medium">4GB RAM</span>
+                        </div>
+                        <div class="system-requirement">
+                            <span class="text-white/80">网络环境</span>
+                            <span class="text-white font-medium">高速Wi-Fi</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Version History -->
+    <section class="py-20 px-6">
+        <div class="container mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-white mb-4">版本历史</h2>
+                <p class="text-xl text-white/80">持续更新，不断优化</p>
+            </div>
+            
+            <div class="max-w-4xl mx-auto space-y-6">
+                <div class="liquid-glass p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-bold text-white">v3.2.0</h3>
+                        <span class="text-white/60 text-sm">2025年1月</span>
+                    </div>
+                    <div class="text-white/80 mb-3">
+                        <p class="font-semibold mb-2">新功能：</p>
+                        <ul class="list-disc list-inside space-y-1 text-sm">
+                            <li>支持iOS 26 LiquidGlass设计</li>
+                            <li>新增AES-256加密功能</li>
+                            <li>优化分卷压缩算法</li>
+                            <li>增强云端同步功能</li>
+                        </ul>
+                    </div>
+                    <div class="text-white/60 text-sm">
+                        <p class="font-semibold mb-1">修复：</p>
+                        <ul class="list-disc list-inside space-y-1 text-sm">
+                            <li>修复大文件解压崩溃问题</li>
+                            <li>优化内存使用效率</li>
+                            <li>提升UI响应速度</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="liquid-glass p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-bold text-white">v3.1.0</h3>
+                        <span class="text-white/60 text-sm">2024年12月</span>
+                    </div>
+                    <div class="text-white/80 mb-3">
+                        <p class="font-semibold mb-2">新功能：</p>
+                        <ul class="list-disc list-inside space-y-1 text-sm">
+                            <li>新增7Z格式压缩支持</li>
+                            <li>优化多线程处理性能</li>
+                            <li>增强文件预览功能</li>
+                        </ul>
+                    </div>
+                    <div class="text-white/60 text-sm">
+                        <p class="font-semibold mb-1">修复：</p>
+                        <ul class="list-disc list-inside space-y-1 text-sm">
+                            <li>修复RAR解压兼容性问题</li>
+                            <li>优化网络连接稳定性</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="liquid-glass p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-bold text-white">v3.0.0</h3>
+                        <span class="text-white/60 text-sm">2024年11月</span>
+                    </div>
+                    <div class="text-white/80 mb-3">
+                        <p class="font-semibold mb-2">新功能：</p>
+                        <ul class="list-disc list-inside space-y-1 text-sm">
+                            <li>全新UI界面设计</li>
+                            <li>支持分卷压缩功能</li>
+                            <li>新增批量操作模式</li>
+                            <li>集成更多云服务</li>
+                        </ul>
+                    </div>
+                    <div class="text-white/60 text-sm">
+                        <p class="font-semibold mb-1">修复：</p>
+                        <ul class="list-disc list-inside space-y-1 text-sm">
+                            <li>修复多个已知bug</li>
+                            <li>提升整体稳定性</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- FAQ Section -->
+    <section class="py-20 px-6">
+        <div class="container mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-white mb-4">常见问题</h2>
+                <p class="text-xl text-white/80">快速找到您需要的答案</p>
+            </div>
+            
+            <div class="max-w-4xl mx-auto">
+                <div class="liquid-glass">
+                    <div class="faq-item p-6 cursor-pointer" data-faq="1">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-semibold text-white">如何升级到专业版？</h3>
+                            <span class="text-white/60 text-xl">+</span>
+                        </div>
+                        <div class="faq-answer mt-4">
+                            <p class="text-white/80">您可以在应用内直接升级到专业版。点击设置页面的"升级到专业版"按钮，按照提示完成购买即可。升级后您将立即获得所有专业功能。</p>
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item p-6 cursor-pointer" data-faq="2">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-semibold text-white">支持哪些压缩格式？</h3>
+                            <span class="text-white/60 text-xl">+</span>
+                        </div>
+                        <div class="faq-answer mt-4">
+                            <p class="text-white/80">免费版支持ZIP格式，专业版支持ZIP、7Z、RAR、TAR、GZ、BZ2等所有主流格式。企业版还提供额外的格式支持和定制功能。</p>
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item p-6 cursor-pointer" data-faq="3">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-semibold text-white">加密功能安全吗？</h3>
+                            <span class="text-white/60 text-xl">+</span>
+                        </div>
+                        <div class="faq-answer mt-4">
+                            <p class="text-white/80">我们使用AES-256军用级加密标准，这是目前最安全的加密算法之一。您的文件密码不会被存储，确保最高级别的安全性。</p>
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item p-6 cursor-pointer" data-faq="4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-semibold text-white">可以处理多大的文件？</h3>
+                            <span class="text-white/60 text-xl">+</span>
+                        </div>
+                        <div class="faq-answer mt-4">
+                            <p class="text-white/80">理论上没有文件大小限制，实际处理能力取决于您的设备内存和存储空间。建议在处理大文件时确保设备有足够的可用空间。</p>
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item p-6 cursor-pointer" data-faq="5">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-semibold text-white">是否支持中文文件名？</h3>
+                            <span class="text-white/60 text-xl">+</span>
+                        </div>
+                        <div class="faq-answer mt-4">
+                            <p class="text-white/80">完全支持中文文件名和Unicode字符。我们的应用采用UTF-8编码，确保在全球各种语言环境下都能正常工作。</p>
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item p-6 cursor-pointer" data-faq="6">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-semibold text-white">忘记压缩包密码怎么办？</h3>
+                            <span class="text-white/60 text-xl">+</span>
+                        </div>
+                        <div class="faq-answer mt-4">
+                            <p class="text-white/80">出于安全考虑，我们无法帮助您恢复忘记的密码。建议您在设置密码时使用容易记住但足够复杂的密码，或者使用密码管理器保存密码。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Support Section -->
+    <section class="py-20 px-6">
+        <div class="container mx-auto text-center">
+            <div class="liquid-glass p-12 max-w-2xl mx-auto">
+                <h2 class="text-3xl font-bold text-white mb-6">需要帮助？</h2>
+                <p class="text-xl text-white/80 mb-8">我们的技术支持团队随时为您服务</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="text-center">
+                        <div class="text-3xl mb-3">📧</div>
+                        <h3 class="text-white font-semibold mb-2">邮件支持</h3>
+                        <p class="text-white/60 text-sm">support@zipmaster.pro</p>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="text-3xl mb-3">💬</div>
+                        <h3 class="text-white font-semibold mb-2">在线客服</h3>
+                        <p class="text-white/60 text-sm">工作日 9:00-18:00</p>
+                    </div>
+                </div>
+                
+                <button class="liquid-glass px-8 py-4 text-white font-semibold text-lg hover:scale-105 transition-transform">
+                    联系客服
+                </button>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer class="py-12 px-6">
+        <div class="container mx-auto text-center">
+            <div class="flex items-center justify-center space-x-3 mb-6">
+                <div class="w-10 h-10 bg-gradient-to-r from-purple-400 to-pink-400 rounded-lg flex items-center justify-center">
+                    <span class="text-white font-bold text-lg">Z</span>
+                </div>
+                <span class="text-white font-bold text-xl">ZipMaster Pro</span>
+            </div>
+            <p class="text-white/60 text-sm">© 2025 ZipMaster Pro. 专为iOS 26 LiquidGlass设计打造</p>
+        </div>
+    </footer>
+    
+    <script src="main.js"></script>
+</body>
+</html>
